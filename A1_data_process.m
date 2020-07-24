@@ -7,7 +7,8 @@ clear; clc;
 % Esta é uma rotina mestre. Antes de utilizar, minimize todas as seções do
 % código.
 % O objetivo desta rotina é validar o processamento da medição de
-% impedância in-situ de um material conhecido.
+% impedância in-situ de um material conhecido. O material em questão é uma
+% espuma cinza de espessura de 22 milimetros e area de 0,09 m²
 %
 % Referências:
 % [1] An exact Laplace transform formulation for a point source above 
@@ -74,7 +75,7 @@ coord_thetas = deg2rad(0:78); % Vetor de angulos (p/ estimativa de
 % Absorção em terço de oitava
 [freq_t,alpha_input_third] = narrow_to_one_third_octave(input.freq_sim,alpha_input);
 %% 3. Carregando medição
-load('med_pp_5.mat')
+load('med_pp_7.mat')
 %% 4. Processando medições
 % tic 
 % FT da medição normal
