@@ -14,7 +14,7 @@ function resist_fit=bazley_alpha_fit2(xdata,ydata,dimm,x0)
 
 d1=dimm/1000;     % Thickness in [mm]
 
-zs_field = @(resist,xdata) material_reference(xdata, d1, resist);
+zs_field = @(resist,xdata) material_reference2(xdata, d1, resist);
 R=@(resist,xdata)((zs_field(resist,xdata)-1)./(zs_field(resist,xdata)+1));
 alpha=@(resist,xdata)(1-abs((R(resist,xdata)).^2));
 %% Curve fitting

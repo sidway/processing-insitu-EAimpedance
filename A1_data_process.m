@@ -21,6 +21,8 @@ clear; clc;
 % ATENÇÃO!!! ESTA ROTINA NECESSITA DO ITATOOLBOX e todas as funções do
 % pacote
 %% 1. Entradas
+% Vai plotar? arg = 1
+arg = 1;
 % Configurações de plot e vetores de frequencia, numero de onda
 [input, f] =  entradas_tcc;
 f.fmax = 10000;
@@ -35,7 +37,7 @@ f.fmin = 100;
     [rho,co,~,~,~,~,~]=propair_panneton(To,Po,HR); clear To Po HR
 % Experimento
     l = 13/1000;            % Distancia entre micrhofones, intriseco do aparato
-    d = 7/1000;             % distancia do mic 1 até a amostra  % distancia do 
+    d = 6.5/1000;             % distancia do mic 1 até a amostra  % distancia do 
     coord.r = 50;           % Distancia da fonte até o centro da amostra
     coord.mic1 = [0 0 l+d]; % Coordenada do mic 1
     coord.mic2 = [0 0 d];   % Coordenada do mic 2
@@ -53,7 +55,7 @@ f.fmin = 100;
     A = complex_pressure(20, 120, 2*pi, coord.thetas); 
 %% 2. Material
 
-thickness = 0.020;  % Espessura do material
+thickness = 0.022;  % Espessura do material
 resistivity = 12500;% Resistividade ao fluxo
 
 coord_thetas = deg2rad(0:78); % Vetor de angulos (p/ estimativa de 
@@ -72,10 +74,7 @@ coord_thetas = deg2rad(0:78); % Vetor de angulos (p/ estimativa de
 % Absorção em terço de oitava
 [freq_t,alpha_input_third] = narrow_to_one_third_octave(input.freq_sim,alpha_input);
 %% 3. Carregando medição
-cd('C:\TCC\medições\2020\med_03_19')
 load('med_pp_5.mat')
-cd('C:\TCC\Organ_codes\main')
-material = 'melamina_preta';
 %% 4. Processando medições
 % tic 
 % FT da medição normal
@@ -91,6 +90,9 @@ plot_transferfunction(freq, smooth(hab_n,ks), f, '-*', [0.2 0.0 0.8]); hold on
 plot_transferfunction(freq, smooth(hab_inv,ks), f, '--', [0.4 0.2 0.2]); hold on
 plot_transferfunction(freq, smooth((hab_n+hab_inv)/2,ks), f, '-', [0.9 0.8 0.2]); hold on
 plot_transferfunction(freq, meas.Hm_smooth, f, '--*', [0.4 0.8 0.2]); hold on
+title('FT da medição');
+legend('Medição normal', 'Microfones invertidos', ...
+    'Média das FTs (utilizado no processamento)', 'FT antigo','location', 'best');
 %% 5. FILTRO de terço de oitava utilizando ITATOOLBOX
 % Aqui será obtido os valores máximos de cada banda de terço de oitava
 % da FT média para acelerar o processamento da otimização
@@ -152,15 +154,19 @@ resist_fit=difuse_alpha_fit(freq_third(5:14)',alphab_third(5:14)',thickness*1000
 [z_fit] =  material_reference2(freq, thickness, resist_fit);
 [~, alpha_fit] = reflection_and_absorption_coefficient(z_fit,1);
 
-figure()
+figure('Name', 'Estimativa da resistividade ao fluxo')
+set(gcf, 'Position', get(0, 'Screensize')); 
 plot_absorption(freq, alpha_fit, f,'--',[1 0.2 0.2]); hold on
 plot_absorption(freq_third, alphab_third, f,'--o',[0.7 0.7 0.7]);
 plot_absorption(freq_t, alpha_input_third,f,'-',[0.0 0.0 0.0]);
-arg = 0;
+title('Comparativo do ajuste de curva')
+legend(['Curva ajustada, \sigma  = ' num2str(resist_fit)],...
+    'Curva medida', ['Referencia, \sigma = ' num2str(resistivity)], 'location', 'best')
+
 %% 9. Plots
 if arg == 1
 %% Impedancia PLOT
-cd('C:\TCC\Matriz\Img\all_materiais')
+
 figure('Name', 'Impedancia de superficie')
 set(gcf, 'Position', get(0, 'Screensize')); 
 plot_impedance(freq, z_avg/(rho*co), f, '--',[0.2 0.2 0.2]);
@@ -173,8 +179,7 @@ legend('Experimental','Experimental em terço de oitava', 'Otimizado',  'Modelo d
 title(['Impedância de superfície. n médias: ' num2str(avg)...
         '; k smooth = ' num2str(ks)])
     
-    saveas(gcf,[material '_impedancia.png'])
-    close all
+
 %% Absorção PLOT
 figure('name', 'Absorption Plot');
 set(gcf, 'Position', get(0, 'Screensize'));
@@ -192,8 +197,7 @@ legend('Experimental','Experimental terço de oitava', 'Otimizado', 'Modelo de en
 title(['Coeficiente de absorção. n médias: ' num2str(avg)...
         '; k smooth = ' num2str(ks)])
     
-%     saveas(gcf,[material '_absorption.png'])
-%     close all
+
 %% Plot Deviation
 figure('name', 'Deviation');
 set(gcf, 'Position', get(0, 'Screensize'));
@@ -204,7 +208,5 @@ legend('Experimental','Otimizado','location', 'best');
 title(['Desvio abs do coef. de absorção. n médias: ' num2str(avg)...
         '; k smooth = ' num2str(ks)])
     
-    saveas(gcf,[material '_deviation.png'])
-    close all
-cd('C:\TCC\Organ_codes\main')
+
 end
